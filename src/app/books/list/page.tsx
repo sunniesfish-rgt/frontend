@@ -9,20 +9,17 @@ interface SearchParams {
   author?: string | string[];
 }
 
-export default async function BooksPage(
-  props: Promise<{
-    searchParams: SearchParams;
-  }>
-) {
-  const { searchParams } = await props;
-
-  const title = Array.isArray(searchParams.title)
-    ? searchParams.title[0]
-    : searchParams.title;
-  const author = Array.isArray(searchParams.author)
-    ? searchParams.author[0]
-    : searchParams.author;
-  const pageNumber = parseInt(searchParams.page || "1", 10);
+export default async function BooksPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const params = await searchParams;
+  const title = Array.isArray(params.title) ? params.title[0] : params.title;
+  const author = Array.isArray(params.author)
+    ? params.author[0]
+    : params.author;
+  const pageNumber = parseInt(params.page || "1", 10);
 
   const books = await bookService.getBooks({
     page: pageNumber,
