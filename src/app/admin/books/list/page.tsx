@@ -10,11 +10,13 @@ interface SearchParams {
   author?: string | string[];
 }
 
-export default async function AdminBooksPage({
-  searchParams,
-}: {
-  searchParams: SearchParams;
-}) {
+export default async function AdminBooksPage(
+  props: Promise<{
+    searchParams: SearchParams;
+  }>
+) {
+  const { searchParams } = await props;
+
   try {
     const pageNumber = parseInt(searchParams.page || "1", 10);
     const title = Array.isArray(searchParams.title)
