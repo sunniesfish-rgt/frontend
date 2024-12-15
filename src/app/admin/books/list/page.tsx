@@ -6,17 +6,18 @@ import { Suspense } from "react";
 
 interface SearchParams {
   page?: string;
-  title?: string;
-  author?: string;
+  title?: string | string[];
+  author?: string | string[];
+}
+
+interface AdminBooksPageProps {
+  searchParams: SearchParams;
 }
 
 export default async function AdminBooksPage({
-  searchParams: rawSearchParams,
-}: {
-  searchParams: SearchParams;
-}) {
+  searchParams,
+}: AdminBooksPageProps) {
   try {
-    const searchParams = await Promise.resolve(rawSearchParams);
     const pageNumber = parseInt(searchParams.page || "1", 10);
     const title = Array.isArray(searchParams.title)
       ? searchParams.title[0]
@@ -24,6 +25,7 @@ export default async function AdminBooksPage({
     const author = Array.isArray(searchParams.author)
       ? searchParams.author[0]
       : searchParams.author;
+
     const books = await bookService.getBooks({
       page: pageNumber,
       title,
