@@ -10,21 +10,18 @@ interface SearchParams {
   author?: string | string[];
 }
 
-interface AdminBooksPageProps {
-  searchParams: SearchParams;
-}
-
 export default async function AdminBooksPage({
   searchParams,
-}: AdminBooksPageProps) {
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
   try {
-    const pageNumber = parseInt(searchParams.page || "1", 10);
-    const title = Array.isArray(searchParams.title)
-      ? searchParams.title[0]
-      : searchParams.title;
-    const author = Array.isArray(searchParams.author)
-      ? searchParams.author[0]
-      : searchParams.author;
+    const params = await searchParams;
+    const pageNumber = parseInt(params.page || "1", 10);
+    const title = Array.isArray(params.title) ? params.title[0] : params.title;
+    const author = Array.isArray(params.author)
+      ? params.author[0]
+      : params.author;
 
     const books = await bookService.getBooks({
       page: pageNumber,
