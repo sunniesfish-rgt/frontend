@@ -4,7 +4,15 @@ import type { NextRequest } from "next/server";
 const ADMIN_PATHS = ["/admin/:path*"];
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, searchParams } = request.nextUrl;
+
+  if (pathname === "/books/list" || pathname === "/admin/books/list") {
+    if (!searchParams.has("page")) {
+      const url = request.nextUrl.clone();
+      url.searchParams.set("page", "1");
+      return NextResponse.redirect(url);
+    }
+  }
 
   const isAdminPage = ADMIN_PATHS.some((path) => {
     const pattern = new RegExp(`^${path.replace(/\*/g, ".*")}$`);
@@ -16,17 +24,24 @@ export async function middleware(request: NextRequest) {
   }
 
   const authCookie = request.cookies.get("Authentication");
-
   if (!authCookie?.value) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("from", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+  const url = new URL(
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:4000"
+      : process.env.NEXT_PUBLIC_API_URL!
+  );
+  response.headers.set("Access-Control-Allow-Credentials", "true");
+  response.headers.set("Access-Control-Allow-Origin", url.origin);
+
+  return response;
 }
 
-// 미들웨어를 적용할 경로 설정
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

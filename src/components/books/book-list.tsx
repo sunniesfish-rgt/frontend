@@ -9,29 +9,43 @@ interface BookListProps {
 
 export function BookList({ books, isAdmin = false }: BookListProps) {
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="flex flex-col gap-4">
       {books.map((book) => (
         <Link
-          href={isAdmin ? `/admin/books/${book.id}` : `/books/${book.id}`}
+          href={
+            isAdmin
+              ? `/admin/books/detail/${book.id}`
+              : `/books/detail/${book.id}`
+          }
           key={book.id}
         >
-          <div className="border rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 ease-in-out">
-            <Image
-              src={book.coverImageThumbnail}
-              alt={book.title}
-              width={300}
-              height={400}
-              className="w-full h-64 object-cover"
-            />
-            <div className="p-4">
-              <h3 className="text-lg font-semibold">{book.title}</h3>
-              <p className="text-sm text-gray-600">{book.author}</p>
-              <p className="text-sm font-medium mt-2">
-                ${book.price.toFixed(2)}
-              </p>
-              <p className="text-sm text-gray-600 mt-1">
-                Stock: {book.stockQuantity}
-              </p>
+          <div className="flex border rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 ease-in-out w-full">
+            <div className="w-32 h-32 flex-shrink-0">
+              <Image
+                src={
+                  book.coverImageThumbnail?.length > 0
+                    ? book.coverImageThumbnail
+                    : "/images/no-image.png"
+                }
+                alt={book.title}
+                width={128}
+                height={128}
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div className="flex flex-1 items-center p-4">
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold line-clamp-1">
+                  {book.title}
+                </h3>
+                <p className="text-sm text-gray-600">{book.author}</p>
+              </div>
+              <div className="flex flex-col items-end ml-4">
+                <p className="text-sm font-medium">{book.price}원</p>
+                <p className="text-sm text-gray-600">
+                  재고: {book.stockQuantity}
+                </p>
+              </div>
             </div>
           </div>
         </Link>

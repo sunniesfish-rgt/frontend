@@ -1,42 +1,45 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useBooksMutations } from "@/hooks/book.hook";
-import { useBookStore } from "@/store/book-store";
+import { useBookQuery, useBooksMutations } from "@/hooks/book.hook";
 import { UpdateBookDto } from "@/types/book.type";
 
-export default function AdminBookEditPage({
-  params,
-}: {
-  params: { bookId: string };
-}) {
+export default function AdminBookEditPage() {
   const router = useRouter();
-  const { books } = useBookStore();
+  const { bookId } = useParams();
+  const { data: book } = useBookQuery(bookId as string);
   const { updateBook } = useBooksMutations();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
+    setValue,
   } = useForm<UpdateBookDto>({
     defaultValues: {
-      title: books[params.bookId].title,
-      author: books[params.bookId].author,
-      publishedDate: books[params.bookId].publishedDate,
-      description: books[params.bookId].description,
-      coverImage: books[params.bookId].coverImage,
-      metadata: books[params.bookId].metadata,
+      id: bookId as string,
+      title: book?.title,
+      author: book?.author,
+      publishedDate: book?.publishedDate,
+      description: book?.description,
+      coverImage: book?.coverImage,
+      metadata: {
+        stockQuantity: book?.metadata.stockQuantity,
+        price: book?.metadata.price,
+      },
     },
   });
 
   const onSubmit = async (data: UpdateBookDto) => {
     try {
-      await updateBook.mutateAsync({ id: params.bookId, data });
-      router.push(`/admin/books/${params.bookId}`);
+      await updateBook.mutateAsync({ id: bookId as string, data });
+      router.push(`/admin/books/detail/${bookId}`);
     } catch (error) {
       console.error(error);
     }
@@ -48,14 +51,14 @@ export default function AdminBookEditPage({
         <div className="flex flex-col md:flex-row gap-8">
           <div className="md:w-1/3">
             <Image
-              src={books[params.bookId].coverImage}
-              alt={books[params.bookId].title}
+              src={"/images/no-image.png"}
+              alt={book?.title ?? ""}
               width={400}
               height={600}
               className="w-full rounded-lg shadow-lg"
             />
             <Button type="button" className="mt-4 w-full">
-              Change Image
+              Change Image - 미구현
             </Button>
           </div>
           <div className="md:w-2/3 space-y-4">
@@ -121,15 +124,83 @@ export default function AdminBookEditPage({
               </label>
               <Textarea
                 id="description"
-                {...register("description", {
-                  required: "설명을 입력해주세요",
-                })}
+                {...register("description", {})}
                 rows={6}
                 aria-invalid={errors.description ? "true" : "false"}
               />
-              {errors.description && (
+            </div>
+            <div>
+              <label
+                htmlFor="price"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Price
+              </label>
+              <Input
+                id="price"
+                type="number"
+                step="0.01"
+                {...register("metadata.price", {
+                  required: "가격을 입력해주세요",
+                })}
+                aria-invalid={errors.metadata?.price ? "true" : "false"}
+              />
+              {errors.metadata?.price && (
                 <p className="text-red-500 text-sm">
-                  {errors.description.message}
+                  {errors.metadata.price.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <label
+                htmlFor="stock"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Stock Quantity
+              </label>
+              <div className="flex items-center space-x-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const currentValue = Number(
+                      watch("metadata.stockQuantity") || 0
+                    );
+                    setValue(
+                      "metadata.stockQuantity",
+                      Math.max(0, currentValue - 1)
+                    );
+                  }}
+                >
+                  -
+                </Button>
+                <Input
+                  id="stock"
+                  type="number"
+                  className="w-20 text-center"
+                  {...register("metadata.stockQuantity", {
+                    required: "재고 수량을 입력해주세요",
+                    min: { value: 0, message: "재고는 0 이상이어야 합니다" },
+                  })}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const currentValue = Number(
+                      watch("metadata.stockQuantity") || 0
+                    );
+                    setValue("metadata.stockQuantity", currentValue + 1);
+                  }}
+                >
+                  +
+                </Button>
+              </div>
+              {errors.metadata?.stockQuantity && (
+                <p className="text-red-500 text-sm">
+                  {errors.metadata.stockQuantity.message}
                 </p>
               )}
             </div>

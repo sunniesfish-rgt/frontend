@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { bookService } from "@/services/book";
 import { useQuery } from "@tanstack/react-query";
 import {
+  Book,
   BookSearchData,
   CreateBookDto,
   GetBooksParams,
@@ -16,12 +17,22 @@ export function useBooksQuery(
   initialData?: PaginatedResponse<BookSearchData>
 ) {
   return useQuery({
-    queryKey: ["books"],
+    queryKey: ["books", pageNo, params],
     queryFn: () =>
       bookService.getBooks({
         page: pageNo,
         ...params,
       }),
+    staleTime: 1000 * 60 * 10,
+    initialData: initialData ?? undefined,
+  });
+}
+
+export function useBookQuery(bookId: string, initialData?: Book) {
+  return useQuery({
+    queryKey: ["book", bookId],
+    queryFn: () => bookService.getBookById(bookId),
+    enabled: !!bookId,
     staleTime: 1000 * 60 * 5,
     initialData: initialData ?? undefined,
   });
@@ -39,7 +50,8 @@ export function useBooksMutations() {
     updateBook: useMutation({
       mutationFn: ({ id, data }: { id: string; data: UpdateBookDto }) =>
         bookService.updateBook(id, data),
-      onSuccess: () => {
+      onSuccess: (_, { id }) => {
+        queryClient.invalidateQueries({ queryKey: ["book", id] });
         queryClient.invalidateQueries({ queryKey: ["books"] });
       },
     }),

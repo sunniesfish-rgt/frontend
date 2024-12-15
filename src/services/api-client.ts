@@ -15,34 +15,20 @@ export class ApiClient {
     };
   }
 
-  async get<T>(
-    endpoint: string,
-    params?: GetBooksParams
+  private async handleUnauthorized(): Promise<void> {
+    window.location.href = "/login";
+  }
+
+  private async executeRequest<T>(
+    requestFn: () => Promise<Response>
   ): Promise<ApiResponse<T>> {
     try {
-      console.log(
-        "URL",
-        `${this.baseURL}${endpoint}${
-          params
-            ? `?${new URLSearchParams(
-                params as Record<string, string>
-              ).toString()}`
-            : ""
-        }`
-      );
-      const response = await fetch(
-        `${this.baseURL}${endpoint}${
-          params
-            ? `?${new URLSearchParams(
-                params as Record<string, string>
-              ).toString()}`
-            : ""
-        }`,
-        {
-          method: "GET",
-          headers: this.defaultHeaders,
-        }
-      );
+      const response = await requestFn();
+
+      if (response.status === 401) {
+        await this.handleUnauthorized();
+        throw new Error("인증되지 않은 요청입니다.");
+      }
 
       if (!response.ok) {
         throw await this.handleError(response);
@@ -58,6 +44,25 @@ export class ApiClient {
     }
   }
 
+  async get<T>(
+    endpoint: string,
+    params?: GetBooksParams
+  ): Promise<ApiResponse<T>> {
+    const url = `${this.baseURL}${endpoint}${
+      params
+        ? `?${new URLSearchParams(params as Record<string, string>).toString()}`
+        : ""
+    }`;
+    console.log("url", url);
+    return this.executeRequest<T>(() =>
+      fetch(url, {
+        method: "GET",
+        headers: this.defaultHeaders,
+        credentials: "include",
+      })
+    );
+  }
+
   async post<T, U = unknown>(
     endpoint: string,
     body: U
@@ -67,8 +72,10 @@ export class ApiClient {
         method: "POST",
         headers: this.defaultHeaders,
         body: JSON.stringify(body),
+        credentials: "include",
       });
 
+      console.log(response);
       if (!response.ok) {
         throw await this.handleError(response);
       }
@@ -88,6 +95,7 @@ export class ApiClient {
     body: U,
     params?: GetBooksParams
   ): Promise<ApiResponse<T>> {
+    console.log("body", body);
     try {
       const response = await fetch(
         `${this.baseURL}${endpoint}${
@@ -101,9 +109,10 @@ export class ApiClient {
           method: "PUT",
           headers: this.defaultHeaders,
           body: JSON.stringify(body),
+          credentials: "include",
         }
       );
-
+      console.log("response", response);
       if (!response.ok) {
         throw await this.handleError(response);
       }
@@ -123,6 +132,7 @@ export class ApiClient {
       const response = await fetch(`${this.baseURL}${endpoint}`, {
         method: "DELETE",
         headers: this.defaultHeaders,
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -162,5 +172,4 @@ export const apiClient = new ApiClient({
     process.env.NODE_ENV === "development"
       ? "http://localhost:4000/api"
       : process.env.NEXT_PUBLIC_API_URL || "",
-  headers: {},
 });

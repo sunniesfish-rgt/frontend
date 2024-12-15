@@ -38,11 +38,13 @@ export function SignUpForm() {
     try {
       const result = await authService.checkUserId(userId);
       if (result) {
+        console.log("if result", result);
         toast({
           title: "사용 가능한 아이디",
           description: "이 아이디를 사용하실 수 있습니다.",
         });
       } else {
+        console.log("else result", result);
         toast({
           title: "확인 실패",
           description: "이 아이디는 이미 사용 중입니다.",
@@ -51,6 +53,7 @@ export function SignUpForm() {
       }
     } catch (err) {
       const error = err as ApiError;
+      console.log("error", error);
       toast({
         title: "확인 실패",
         description: error.message || "아이디 중복 확인에 실패했습니다.",
@@ -64,7 +67,7 @@ export function SignUpForm() {
 
     try {
       await authService.signUp(data);
-      router.push("/books");
+      router.push("/login");
     } catch (err) {
       const error = err as ApiError;
       setError("root", {

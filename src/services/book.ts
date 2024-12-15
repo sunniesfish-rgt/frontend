@@ -12,14 +12,19 @@ export const bookService = {
     params?: GetBooksParams
   ): Promise<PaginatedResponse<BookSearchData>> => {
     try {
+      const filteredParams = Object.fromEntries(
+        Object.entries(params || {}).filter(
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          ([_, value]) => value != null && value !== ""
+        )
+      );
       const response = await apiClient.get<PaginatedResponse<BookSearchData>>(
         "/books",
-        params
+        filteredParams
       );
       return response.data;
     } catch (error) {
-      console.log(error);
-      throw new Error("책 목록을 불러오는 중 오류가 발생했습니다.");
+      throw new Error("책 목록을 불러오는 중 오류가 발생했습니다. " + error);
     }
   },
 
@@ -28,8 +33,7 @@ export const bookService = {
       const response = await apiClient.get<Book>(`/books/${id}`);
       return response.data;
     } catch (error) {
-      console.log(error);
-      throw new Error("책 정보를 불러오는 중 오류가 발생했습니다.");
+      throw new Error("책 정보를 불러오는 중 오류가 발생했습니다. " + error);
     }
   },
 
@@ -41,8 +45,7 @@ export const bookService = {
       );
       return response.data;
     } catch (error) {
-      console.log(error);
-      throw new Error("책 생성 중 오류가 발생했습니다.");
+      throw new Error("책 생성 중 오류가 발생했습니다. " + error);
     }
   },
 
@@ -54,8 +57,7 @@ export const bookService = {
       );
       return response.data;
     } catch (error) {
-      console.log(error);
-      throw new Error("책 업데이트 중 오류가 발생했습니다.");
+      throw new Error("책 업데이트 중 오류가 발생했습니다. " + error);
     }
   },
 
@@ -64,8 +66,7 @@ export const bookService = {
       const response = await apiClient.delete<boolean>(`/books/${id}`);
       return response.data;
     } catch (error) {
-      console.log(error);
-      throw new Error("책 삭제 중 오류가 발생했습니다.");
+      throw new Error("책 삭제 중 오류가 발생했습니다. " + error);
     }
   },
 };

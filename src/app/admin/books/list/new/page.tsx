@@ -21,12 +21,14 @@ import { useBooksMutations } from "@/hooks/book.hook";
 const bookFormSchema = z.object({
   title: z.string().min(1, "제목을 입력해주세요"),
   author: z.string().min(1, "저자를 입력해주세요"),
-  publishedDate: z.date(),
-  description: z.string().min(10, "설명은 최소 10자 이상 입력해주세요"),
+  publishedDate: z.string().refine((date) => !isNaN(Date.parse(date)), {
+    message: "유효한 날짜를 입력해주세요",
+  }),
+  description: z.string().optional(),
   coverImage: z.string(),
   metadata: z.object({
-    stockQuantity: z.number().min(0, "재고는 0 이상이어야 합니다"),
-    price: z.number().min(0, "가격은 0 이상이어야 합니다"),
+    stockQuantity: z.number().min(0, "재고는 0 이상이어야 합니다").optional(),
+    price: z.number().min(0, "가격은 0 이상이어야 합니다").optional(),
   }),
 });
 
@@ -35,12 +37,12 @@ type BookFormValues = z.infer<typeof bookFormSchema>;
 const defaultValues: BookFormValues = {
   title: "",
   author: "",
-  publishedDate: new Date(),
-  description: "",
+  publishedDate: "",
+  description: undefined,
   coverImage: "/placeholder.svg?height=600&width=400",
   metadata: {
-    stockQuantity: 0,
-    price: 0,
+    stockQuantity: undefined,
+    price: undefined,
   },
 };
 
@@ -57,7 +59,7 @@ export default function AdminNewBookPage() {
   const onSubmit = async (data: BookFormValues) => {
     try {
       await createBook.mutateAsync(data);
-      router.push("/admin/books");
+      router.push("/admin/books/list");
     } catch (error) {
       console.error(error);
     }
@@ -120,7 +122,11 @@ export default function AdminNewBookPage() {
                       <Input
                         type="date"
                         {...field}
-                        value={field.value.toISOString().split("T")[0]}
+                        value={
+                          field.value
+                            ? new Date(field.value).toISOString().split("T")[0]
+                            : ""
+                        }
                       />
                     </FormControl>
                     <FormMessage />
@@ -136,6 +142,48 @@ export default function AdminNewBookPage() {
                     <FormLabel>Description</FormLabel>
                     <FormControl>
                       <Textarea rows={6} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="metadata.stockQuantity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Stock Quantity</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        {...field}
+                        value={field.value}
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value, 10))
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="metadata.price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Price</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        {...field}
+                        value={field.value}
+                        onChange={(e) =>
+                          field.onChange(parseFloat(e.target.value))
+                        }
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

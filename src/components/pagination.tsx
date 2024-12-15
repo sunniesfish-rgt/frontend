@@ -1,8 +1,7 @@
-import { ChevronRight } from "lucide-react";
+"use client";
 
-import { ChevronLeft } from "lucide-react";
-
-import { useRouter } from "next/navigation";
+import { ChevronRight, ChevronLeft } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "./ui/button";
 import React from "react";
 
@@ -13,6 +12,32 @@ interface PaginationProps {
   hasPreviousPage: boolean;
   baseUrl: string;
 }
+
+interface PageButtonProps {
+  page: number;
+  isCurrentPage: boolean;
+  onClick: (page: number) => void;
+}
+
+const PageButton = ({ page, isCurrentPage, onClick }: PageButtonProps) => (
+  <Button
+    variant={isCurrentPage ? "secondary" : "outline"}
+    size="sm"
+    onClick={() => onClick(page)}
+    className={`min-w-[2.5rem] ${
+      isCurrentPage
+        ? "bg-primary text-primary-foreground font-medium"
+        : "hover:bg-secondary/80"
+    }`}
+  >
+    {page}
+  </Button>
+);
+
+const PageEllipsis = () => (
+  <span className="px-2 text-muted-foreground">...</span>
+);
+
 export function Pagination({
   currentPage,
   lastPage,
@@ -20,13 +45,44 @@ export function Pagination({
   hasPreviousPage,
   baseUrl,
 }: PaginationProps) {
+  const thisPage = Number(currentPage);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const createPageUrl = (page: number) => {
-    const url = new URL(baseUrl, window.location.origin);
-    const searchParams = new URLSearchParams(window.location.search);
-    url.searchParams.set("page", page.toString());
-    return `${url.pathname}?${searchParams.toString()}`;
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", page.toString());
+    router.push(`${baseUrl}?${params.toString()}`);
+  };
+
+  const getVisiblePages = () => {
+    return Array.from({ length: lastPage }, (_, i) => i + 1).filter(
+      (page) =>
+        page === 1 ||
+        page === lastPage ||
+        (page >= thisPage - 2 && page <= thisPage + 2)
+    );
+  };
+
+  const renderPageButtons = () => {
+    const visiblePages = getVisiblePages();
+
+    return visiblePages.map((page, index) => {
+      const isCurrentPage = thisPage === page;
+      const previousPage = visiblePages[index - 1];
+      const needsEllipsis = index > 0 && previousPage !== page - 1;
+
+      return (
+        <React.Fragment key={`page-${page}`}>
+          {needsEllipsis && <PageEllipsis />}
+          <PageButton
+            page={page}
+            isCurrentPage={isCurrentPage}
+            onClick={handlePageChange}
+          />
+        </React.Fragment>
+      );
+    });
   };
 
   return (
@@ -35,52 +91,18 @@ export function Pagination({
         variant="outline"
         size="sm"
         disabled={!hasPreviousPage}
-        onClick={() => router.push(createPageUrl(currentPage - 1))}
+        onClick={() => handlePageChange(thisPage - 1)}
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
 
-      <div className="flex gap-1">
-        {Array.from({ length: lastPage }, (_, i) => i + 1)
-          .filter(
-            (page) =>
-              page === 1 ||
-              page === lastPage ||
-              (page >= currentPage - 1 && page <= currentPage + 1)
-          )
-          .map((page, index, array) => {
-            if (index > 0 && array[index - 1] !== page - 1) {
-              return (
-                <React.Fragment key={`ellipsis-${page}`}>
-                  <span className="px-2">...</span>
-                  <Button
-                    variant={currentPage === page ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => router.push(createPageUrl(page))}
-                  >
-                    {page}
-                  </Button>
-                </React.Fragment>
-              );
-            }
-            return (
-              <Button
-                key={page}
-                variant={currentPage === page ? "default" : "outline"}
-                size="sm"
-                onClick={() => router.push(createPageUrl(page))}
-              >
-                {page}
-              </Button>
-            );
-          })}
-      </div>
+      <div className="flex gap-1">{renderPageButtons()}</div>
 
       <Button
         variant="outline"
         size="sm"
         disabled={!hasNextPage}
-        onClick={() => router.push(createPageUrl(currentPage + 1))}
+        onClick={() => handlePageChange(thisPage + 1)}
       >
         <ChevronRight className="h-4 w-4" />
       </Button>

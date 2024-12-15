@@ -16,7 +16,7 @@ export interface Book {
   id: string;
   title: string;
   author: string;
-  publishedDate: Date;
+  publishedDate: string;
   coverImage: string;
   description: string;
   metadata: BookMetadata;
@@ -25,7 +25,7 @@ export interface Book {
 export interface CreateBookDto {
   title: string;
   author: string;
-  publishedDate: Date;
+  publishedDate: string;
   description?: string;
   coverImage?: string;
   coverImageThumbnail?: string;
@@ -35,7 +35,12 @@ export interface CreateBookDto {
   };
 }
 
-export type UpdateBookDto = Partial<CreateBookDto>;
+export type UpdateBookDto = Omit<Book, "metadata"> & {
+  metadata?: {
+    stockQuantity?: number;
+    price?: number;
+  };
+};
 
 export interface GetBooksParams {
   page?: number;

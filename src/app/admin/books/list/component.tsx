@@ -3,13 +3,13 @@
 import { PaginatedResponse } from "@/types/common.type";
 import { BookList } from "@/components/books/book-list";
 import { SearchForm } from "@/components/books/search-form";
-import { Link } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BookSearchData } from "@/types/book.type";
-import { useSearchParams } from "next/navigation";
 import { useBooksQuery } from "@/hooks/book.hook";
 import { Spinner } from "@/components/ui/spinner";
 import { Pagination } from "@/components/pagination";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 export default function AdminBooks({
   booksData,
@@ -19,7 +19,6 @@ export default function AdminBooks({
   pageNo: number;
 }) {
   const searchParams = useSearchParams();
-  const query = searchParams.get("query") || "";
   const {
     data: booksPage,
     isLoading,
@@ -28,8 +27,8 @@ export default function AdminBooks({
   } = useBooksQuery(
     pageNo,
     {
-      author: query,
-      title: query,
+      author: searchParams.get("author") || "",
+      title: searchParams.get("title") || "",
       limit: 10,
       page: pageNo,
       order: "DESC",
@@ -40,11 +39,11 @@ export default function AdminBooks({
     <>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Admin Book Management</h2>
-        <Link href="/admin/books/new">
+        <Link href="/admin/books/list/new">
           <Button>Create New Book</Button>
         </Link>
       </div>
-      <SearchForm />
+      <SearchForm baseUrl="/admin/books/list" />
       {isLoading ? (
         <div className="flex justify-center">
           <Spinner size="lg" />
@@ -55,7 +54,7 @@ export default function AdminBooks({
         <>
           <BookList books={booksPage?.data ?? []} isAdmin />
           <Pagination
-            currentPage={booksPage?.meta.page ?? 1}
+            currentPage={pageNo ?? 1}
             lastPage={booksPage?.meta.lastPage ?? 1}
             hasNextPage={booksPage?.meta.hasNextPage ?? false}
             hasPreviousPage={booksPage?.meta.hasPreviousPage ?? false}

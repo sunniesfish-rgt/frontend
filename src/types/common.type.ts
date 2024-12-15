@@ -5,6 +5,12 @@ export interface PaginationParams {
   order?: "ASC" | "DESC";
 }
 
+export interface SearchParams {
+  page?: string;
+  title?: string | string[];
+  author?: string | string[];
+}
+
 export interface PaginationMeta {
   total: number;
   page: number;

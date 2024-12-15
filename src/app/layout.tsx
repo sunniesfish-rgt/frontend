@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import QueryProvider from "@/config/react-query-provider";
+import "@/styles/globals.css";
+import { Toaster } from "@/components/ui/toaster";
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -14,7 +16,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="ko">
       <body>
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <Toaster />
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );

@@ -5,8 +5,8 @@ import { Pagination } from "@/components/pagination";
 import { PaginatedResponse } from "@/types/common.type";
 import { BookSearchData } from "@/types/book.type";
 import { useBooksQuery } from "@/hooks/book.hook";
-import { useSearchParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
+import { useSearchParams } from "next/navigation";
 
 export default function Books({
   booksData,
@@ -16,7 +16,6 @@ export default function Books({
   pageNo: number;
 }) {
   const searchParams = useSearchParams();
-  const query = searchParams.get("query") || "";
   const {
     data: booksPage,
     isLoading,
@@ -25,8 +24,8 @@ export default function Books({
   } = useBooksQuery(
     pageNo,
     {
-      author: query,
-      title: query,
+      author: searchParams.get("author") || "",
+      title: searchParams.get("title") || "",
       limit: 10,
       page: pageNo,
       order: "DESC",
@@ -36,7 +35,7 @@ export default function Books({
 
   return (
     <>
-      <SearchForm />
+      <SearchForm baseUrl="/books/list" />
       {isLoading ? (
         <div className="flex justify-center">
           <Spinner size="lg" />
@@ -47,7 +46,7 @@ export default function Books({
         <>
           <BookList books={booksPage?.data ?? []} />
           <Pagination
-            currentPage={booksPage?.meta.page ?? 1}
+            currentPage={pageNo ?? 1}
             hasNextPage={booksPage?.meta.hasNextPage ?? false}
             hasPreviousPage={booksPage?.meta.hasPreviousPage ?? false}
             lastPage={booksPage?.meta.lastPage ?? 1}
