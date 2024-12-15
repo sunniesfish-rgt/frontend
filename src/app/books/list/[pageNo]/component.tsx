@@ -1,6 +1,6 @@
-import { Layout } from "@/components/layout";
-import { SearchForm } from "@/components/search-form";
-import { BookList } from "@/components/book-list";
+"use client";
+import { SearchForm } from "@/components/books/search-form";
+import { BookList } from "@/components/books/book-list";
 import { Pagination } from "@/components/pagination";
 import { PaginatedResponse } from "@/types/common.type";
 import { BookSearchData } from "@/types/book.type";
@@ -35,7 +35,7 @@ export default function Books({
   );
 
   return (
-    <Layout showAdminLogin>
+    <>
       <SearchForm />
       {isLoading ? (
         <div className="flex justify-center">
@@ -55,6 +55,6 @@ export default function Books({
           />
         </>
       )}
-    </Layout>
+    </>
   );
 }

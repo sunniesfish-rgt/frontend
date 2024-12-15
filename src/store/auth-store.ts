@@ -1,19 +1,23 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { authService } from "@/services/auth";
 
-interface AuthState {
-  user: boolean | null;
-  setUser: (user: boolean | null) => void;
-  logout: () => void;
+interface AuthStore {
+  isAuthenticated: boolean;
+  setAuthenticated: (value: boolean) => void;
+  signOut: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      user: null,
-      setUser: (user) => set({ user }),
-      logout: () => set({ user: null }),
-    }),
-    { name: "auth-store" }
-  )
-);
+export const useAuthStore = create<AuthStore>((set) => ({
+  isAuthenticated: false,
+
+  setAuthenticated: (value: boolean) => set({ isAuthenticated: value }),
+
+  signOut: async () => {
+    try {
+      await authService.signOut();
+      set({ isAuthenticated: false });
+    } catch (error) {
+      console.error("로그아웃 실패:", error);
+    }
+  },
+}));

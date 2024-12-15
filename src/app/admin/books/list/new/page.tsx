@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import * as z from "zod";
-import { Layout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,13 +16,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useBooksMutations } from "@/hooks/book.hook";
 
 const bookFormSchema = z.object({
   title: z.string().min(1, "제목을 입력해주세요"),
   author: z.string().min(1, "저자를 입력해주세요"),
-  publishDate: z.string().min(1, "출판일을 선택해주세요"),
+  publishedDate: z.date(),
   description: z.string().min(10, "설명은 최소 10자 이상 입력해주세요"),
   coverImage: z.string(),
+  metadata: z.object({
+    stockQuantity: z.number().min(0, "재고는 0 이상이어야 합니다"),
+    price: z.number().min(0, "가격은 0 이상이어야 합니다"),
+  }),
 });
 
 type BookFormValues = z.infer<typeof bookFormSchema>;
@@ -31,9 +35,13 @@ type BookFormValues = z.infer<typeof bookFormSchema>;
 const defaultValues: BookFormValues = {
   title: "",
   author: "",
-  publishDate: "",
+  publishedDate: new Date(),
   description: "",
   coverImage: "/placeholder.svg?height=600&width=400",
+  metadata: {
+    stockQuantity: 0,
+    price: 0,
+  },
 };
 
 export default function AdminNewBookPage() {
@@ -44,14 +52,19 @@ export default function AdminNewBookPage() {
     defaultValues,
   });
 
-  const onSubmit = (data: BookFormValues) => {
-    // TODO: Implement create logic
-    console.log("Create new book", data);
-    router.push("/admin/books");
+  const { createBook } = useBooksMutations();
+
+  const onSubmit = async (data: BookFormValues) => {
+    try {
+      await createBook.mutateAsync(data);
+      router.push("/admin/books");
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
-    <Layout showLogout>
+    <>
       <h2 className="text-2xl font-bold mb-4">Create New Book</h2>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -99,12 +112,16 @@ export default function AdminNewBookPage() {
 
               <FormField
                 control={form.control}
-                name="publishDate"
+                name="publishedDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Publish Date</FormLabel>
+                    <FormLabel>Published Date</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input
+                        type="date"
+                        {...field}
+                        value={field.value.toISOString().split("T")[0]}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -138,6 +155,6 @@ export default function AdminNewBookPage() {
           </div>
         </form>
       </Form>
-    </Layout>
+    </>
   );
 }

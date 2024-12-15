@@ -11,10 +11,10 @@ export interface BookDetailProps {
 }
 
 export function BookDetail({ book, isAdmin = false }: BookDetailProps) {
-  const { setBooks } = useBookStore();
+  const { setBook } = useBookStore();
   useEffect(() => {
-    setBooks({ [book.id]: book });
-  }, [book, setBooks]);
+    setBook(book);
+  }, [book, setBook]);
   return (
     <div className="flex flex-col md:flex-row gap-8">
       <div className="md:w-1/3">

@@ -20,6 +20,16 @@ export class ApiClient {
     params?: GetBooksParams
   ): Promise<ApiResponse<T>> {
     try {
+      console.log(
+        "URL",
+        `${this.baseURL}${endpoint}${
+          params
+            ? `?${new URLSearchParams(
+                params as Record<string, string>
+              ).toString()}`
+            : ""
+        }`
+      );
       const response = await fetch(
         `${this.baseURL}${endpoint}${
           params
@@ -108,7 +118,7 @@ export class ApiClient {
     }
   }
 
-  async delete(endpoint: string): Promise<ApiResponse<boolean>> {
+  async delete<T>(endpoint: string): Promise<ApiResponse<T>> {
     try {
       const response = await fetch(`${this.baseURL}${endpoint}`, {
         method: "DELETE",
@@ -148,8 +158,9 @@ export class ApiClient {
 
 // API 클라이언트 인스턴스 생성
 export const apiClient = new ApiClient({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api",
-  headers: {
-    // Authorization: `Bearer ${useAuthStore.getState().user}`,
-  },
+  baseURL:
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:4000/api"
+      : process.env.NEXT_PUBLIC_API_URL || "",
+  headers: {},
 });

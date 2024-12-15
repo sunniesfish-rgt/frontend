@@ -1,15 +1,14 @@
 "use client";
 
-import { BookList } from "@/components/book-list";
-import { SearchForm } from "@/components/search-form";
+import { PaginatedResponse } from "@/types/common.type";
+import { BookList } from "@/components/books/book-list";
+import { SearchForm } from "@/components/books/search-form";
 import { Link } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Layout } from "@/components/layout";
 import { BookSearchData } from "@/types/book.type";
 import { useSearchParams } from "next/navigation";
 import { useBooksQuery } from "@/hooks/book.hook";
 import { Spinner } from "@/components/ui/spinner";
-import { PaginatedResponse } from "@/types/common.type";
 import { Pagination } from "@/components/pagination";
 
 export default function AdminBooks({
@@ -38,7 +37,7 @@ export default function AdminBooks({
     booksData
   );
   return (
-    <Layout showLogout>
+    <>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Admin Book Management</h2>
         <Link href="/admin/books/new">
@@ -64,6 +63,6 @@ export default function AdminBooks({
           />
         </>
       )}
-    </Layout>
+    </>
   );
 }

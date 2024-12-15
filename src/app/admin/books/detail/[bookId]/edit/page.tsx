@@ -3,18 +3,12 @@
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Layout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useBooksMutations } from "@/hooks/book.hook";
-
-interface BookFormData {
-  title: string;
-  author: string;
-  publishDate: string;
-  description: string;
-}
+import { useBookStore } from "@/store/book-store";
+import { UpdateBookDto } from "@/types/book.type";
 
 export default function AdminBookEditPage({
   params,
@@ -22,34 +16,40 @@ export default function AdminBookEditPage({
   params: { bookId: string };
 }) {
   const router = useRouter();
+  const { books } = useBookStore();
   const { updateBook } = useBooksMutations();
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<BookFormData>({
+  } = useForm<UpdateBookDto>({
     defaultValues: {
-      title: book.title,
-      author: book.author,
-      publishDate: book.publishDate,
-      description: book.description,
+      title: books[params.bookId].title,
+      author: books[params.bookId].author,
+      publishedDate: books[params.bookId].publishedDate,
+      description: books[params.bookId].description,
+      coverImage: books[params.bookId].coverImage,
+      metadata: books[params.bookId].metadata,
     },
   });
 
-  const onSubmit = (data: BookFormData) => {
-    // TODO: Implement update logic
-    console.log("Update book", data);
-    router.push(`/admin/books/${params.bookId}`);
+  const onSubmit = async (data: UpdateBookDto) => {
+    try {
+      await updateBook.mutateAsync({ id: params.bookId, data });
+      router.push(`/admin/books/${params.bookId}`);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
-    <Layout showLogout>
+    <>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="flex flex-col md:flex-row gap-8">
           <div className="md:w-1/3">
             <Image
-              src={book.coverImage}
-              alt={book.title}
+              src={books[params.bookId].coverImage}
+              alt={books[params.bookId].title}
               width={400}
               height={600}
               className="w-full rounded-lg shadow-lg"
@@ -101,14 +101,14 @@ export default function AdminBookEditPage({
               <Input
                 id="publishDate"
                 type="date"
-                {...register("publishDate", {
+                {...register("publishedDate", {
                   required: "출판일을 입력해주세요",
                 })}
-                aria-invalid={errors.publishDate ? "true" : "false"}
+                aria-invalid={errors.publishedDate ? "true" : "false"}
               />
-              {errors.publishDate && (
+              {errors.publishedDate && (
                 <p className="text-red-500 text-sm">
-                  {errors.publishDate.message}
+                  {errors.publishedDate.message}
                 </p>
               )}
             </div>
@@ -142,6 +142,6 @@ export default function AdminBookEditPage({
           <Button type="submit">Save Changes</Button>
         </div>
       </form>
-    </Layout>
+    </>
   );
 }
