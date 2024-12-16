@@ -4,22 +4,46 @@ import { bookService } from "@/services/book";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://rgt-pi.vercel.app/";
 
-  const books = await bookService.getBooks({ page: 1, limit: 100 });
+  try {
+    const books = await bookService.getBooks({ page: 1, limit: 100 });
 
-  const bookUrls = books.data.map((book) => ({
-    url: `${baseUrl}/books/detail/${book.id}`,
-    lastModified: new Date(),
-    changeFrequency: "weekly" as const,
-    priority: 0.7,
-  }));
+    if (!books?.data) {
+      console.error("책 데이터를 불러오는데 실패했습니다.");
+      return [
+        {
+          url: `${baseUrl}/books/list`,
+          lastModified: new Date(),
+          changeFrequency: "daily",
+          priority: 1,
+        },
+      ];
+    }
 
-  return [
-    {
-      url: `${baseUrl}/books/list`,
+    const bookUrls = books.data.map((book) => ({
+      url: `${baseUrl}/books/detail/${book.id}`,
       lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 1,
-    },
-    ...bookUrls,
-  ];
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    }));
+
+    return [
+      {
+        url: `${baseUrl}/books/list`,
+        lastModified: new Date(),
+        changeFrequency: "daily",
+        priority: 1,
+      },
+      ...bookUrls,
+    ];
+  } catch (error) {
+    console.error("사이트맵 생성 중 오류 발생:", error);
+    return [
+      {
+        url: `${baseUrl}/books/list`,
+        lastModified: new Date(),
+        changeFrequency: "daily",
+        priority: 1,
+      },
+    ];
+  }
 }
