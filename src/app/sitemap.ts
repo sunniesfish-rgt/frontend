@@ -7,8 +7,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const books = await bookService.getBooks({ page: 1, limit: 100 });
 
-    if (!books?.data) {
-      console.error("책 데이터를 불러오는데 실패했습니다.");
+    if (!books?.data || books.data.length === 0) {
+      console.log("책 데이터가 없습니다.");
       return [
         {
           url: `${baseUrl}/books/list`,
