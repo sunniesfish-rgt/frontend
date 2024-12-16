@@ -73,14 +73,14 @@ export default function AdminNewBookPage() {
           <div className="flex flex-col md:flex-row gap-8">
             <div className="md:w-1/3">
               <Image
-                src={form.watch("coverImage")}
+                src={"/images/no-image.png"}
                 alt="Book cover"
                 width={400}
                 height={600}
                 className="w-full rounded-lg shadow-lg"
               />
               <Button type="button" className="mt-4 w-full">
-                Upload Image
+                Upload Image - 미구현
               </Button>
             </div>
             <div className="md:w-2/3 space-y-4">

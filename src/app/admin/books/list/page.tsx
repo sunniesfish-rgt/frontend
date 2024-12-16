@@ -1,8 +1,6 @@
 import { bookService } from "@/services/book";
 import AdminBooks from "./component";
 import { BookFetchError } from "@/components/books/book-fetch-error";
-import Loading from "@/components/loading";
-import { Suspense } from "react";
 
 interface SearchParams {
   page?: string;
@@ -29,11 +27,7 @@ export default async function AdminBooksPage({
       author,
     });
 
-    return (
-      <Suspense fallback={<Loading />}>
-        <AdminBooks booksData={books} pageNo={pageNumber} />
-      </Suspense>
-    );
+    return <AdminBooks booksData={books} pageNo={pageNumber} />;
   } catch (error) {
     console.error("도서 목록 조회 실패:", error);
     return <BookFetchError />;

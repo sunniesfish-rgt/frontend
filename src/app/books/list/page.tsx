@@ -1,7 +1,5 @@
 import { bookService } from "@/services/book";
 import Books from "./component";
-import Loading from "@/components/loading";
-import { Suspense } from "react";
 import { Metadata } from "next";
 
 interface SearchParams {
@@ -28,11 +26,7 @@ export default async function BooksPage({
     author,
   });
 
-  return (
-    <Suspense fallback={<Loading />}>
-      <Books booksData={books} pageNo={pageNumber} />
-    </Suspense>
-  );
+  return <Books booksData={books} pageNo={pageNumber} />;
 }
 
 export const metadata: Metadata = {
