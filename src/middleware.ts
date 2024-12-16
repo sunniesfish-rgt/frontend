@@ -6,6 +6,13 @@ const ADMIN_PATHS = ["/admin/:path*"];
 export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
+  if (pathname === "/") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/books/list";
+    url.searchParams.set("page", "1");
+    return NextResponse.redirect(url);
+  }
+
   if (pathname === "/books/list" || pathname === "/admin/books/list") {
     if (!searchParams.has("page")) {
       const url = request.nextUrl.clone();

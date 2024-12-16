@@ -2,6 +2,7 @@ import { bookService } from "@/services/book";
 import Books from "./component";
 import Loading from "@/components/loading";
 import { Suspense } from "react";
+import { Metadata } from "next";
 
 interface SearchParams {
   page?: string;
@@ -33,3 +34,12 @@ export default async function BooksPage({
     </Suspense>
   );
 }
+
+export const metadata: Metadata = {
+  title: "도서 목록",
+  description: "RGT의 모든 도서 목록을 확인하고 검색할 수 있습니다.",
+  openGraph: {
+    title: "도서 목록 | RGT 도서관리 시스템",
+    description: "RGT의 모든 도서 목록을 확인하고 검색할 수 있습니다.",
+  },
+};
