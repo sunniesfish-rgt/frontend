@@ -6,11 +6,12 @@ import { bookService } from "@/services/book";
 import { Suspense } from "react";
 
 interface Props {
-  params: { bookId: string };
+  params: Promise<{ bookId: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const book = await bookService.getBookById(params.bookId);
+  const bookParams = await params;
+  const book = await bookService.getBookById(bookParams.bookId);
 
   return {
     title: book.title,
