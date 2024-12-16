@@ -30,10 +30,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+interface BookDetailPageProps {
+  bookId: string;
+}
+
 export default async function BookDetailPage({
   params,
 }: {
-  params: Promise<{ bookId: string }>;
+  params: Promise<BookDetailPageProps>;
 }) {
   const bookId = await params;
   try {
