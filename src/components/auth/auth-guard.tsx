@@ -12,10 +12,8 @@ interface AuthGuardProps {
 export function AuthGuard({ children }: AuthGuardProps) {
   const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
   const router = useRouter();
-
   useEffect(() => {
     checkAuth();
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -27,6 +25,5 @@ export function AuthGuard({ children }: AuthGuardProps) {
     router.push("/login");
     return null;
   }
-
   return children;
 }

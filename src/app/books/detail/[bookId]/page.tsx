@@ -1,9 +1,7 @@
 import { Metadata } from "next";
 import { BookDetail } from "@/components/books/book-detail";
 import { BookFetchError } from "@/components/books/book-fetch-error";
-import Loading from "@/components/loading";
 import { bookService } from "@/services/book";
-import { Suspense } from "react";
 
 interface Props {
   params: Promise<{ bookId: string }>;
@@ -43,11 +41,7 @@ export default async function BookDetailPage({
   const bookId = await params;
   try {
     const book = await bookService.getBookById(bookId.bookId);
-    return (
-      <Suspense fallback={<Loading />}>
-        <BookDetail book={book} />
-      </Suspense>
-    );
+    return <BookDetail book={book} />;
   } catch (error) {
     console.log(error);
     return <BookFetchError />;
